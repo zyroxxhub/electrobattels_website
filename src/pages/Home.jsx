@@ -490,7 +490,7 @@ export default function Home() {
                 e.preventDefault();
                 document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="inline-flex items-center space-x-2 bg-[#FAF9F6] border border-[#A08246]/20 rounded-full px-6 py-2.5 text-xs text-studio-charcoal uppercase font-bold tracking-widest hover:bg-studio-charcoal hover:text-[#FAF9F6] transition-apple shadow-sm font-sans"
+              className="inline-flex items-center space-x-2 bg-gradient-to-r from-[#DFC98A] to-[#C9A84C] border border-studio-gold/60 rounded-full px-6 py-2.5 text-xs text-[#2C1F0E] uppercase font-bold tracking-widest hover:from-[#C9A84C] hover:to-[#9A7A2E] hover:text-white transition-apple shadow-sm font-sans"
             >
               <span>Inquire Today</span>
               <ArrowRight className="w-4 h-4" />
