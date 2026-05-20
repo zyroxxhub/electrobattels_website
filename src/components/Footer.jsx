@@ -60,7 +60,7 @@ export default function Footer() {
           </div>
 
           {/* Column 2: Quick Links */}
-          <div className="space-y-5">
+          <div className="col-span-2 md:col-span-1 space-y-5">
             <h4 className="font-accent text-[9px] tracking-[0.28em] uppercase text-studio-gold font-medium">
               Explore
             </h4>

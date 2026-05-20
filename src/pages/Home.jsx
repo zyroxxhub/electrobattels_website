@@ -370,8 +370,8 @@ export default function Home() {
                 <span className="text-[9px] uppercase tracking-[0.3em] text-studio-gold/80 font-sans font-semibold">
                   Our Identity
                 </span>
-                <h2 className="font-serif text-4xl md:text-5xl font-normal leading-tight text-studio-charcoal">
-                  Where Passion, Form, & <br />
+                <h2 className="font-serif text-3xl md:text-5xl font-normal leading-tight text-studio-charcoal">
+                  Where Passion, Form, &{' '}
                   <span className="italic font-light text-studio-charcoal/70">Soul Collide</span>
                 </h2>
               </div>
@@ -425,7 +425,7 @@ export default function Home() {
             <span className="text-xs uppercase tracking-widest text-studio-gold font-semibold font-serif italic">
               Unrivaled Standards
             </span>
-            <h2 className="font-serif text-4xl md:text-5xl font-normal text-studio-charcoal">
+            <h2 className="font-serif text-3xl md:text-5xl font-normal text-studio-charcoal">
               Why Elite Dancers Choose <span className="text-gold-gradient italic">Electrobattles</span>
             </h2>
             <p className="text-studio-charcoal/60 font-light font-sans text-sm">
@@ -480,7 +480,7 @@ export default function Home() {
               <span className="text-xs uppercase tracking-widest text-studio-gold font-semibold font-serif italic">
                 Artistic Disciplines
               </span>
-              <h2 className="font-serif text-4xl md:text-5xl font-normal text-studio-charcoal">
+              <h2 className="font-serif text-3xl md:text-5xl font-normal text-studio-charcoal">
                 Dance Styles <span className="text-gold-gradient italic">We Perfect</span>
               </h2>
             </div>
@@ -505,7 +505,7 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                className="group relative rounded-2xl overflow-hidden border border-[#A08246]/15 bg-white shadow-md h-[400px]"
+                className="group relative rounded-2xl overflow-hidden border border-[#A08246]/15 bg-white shadow-md h-[200px] md:h-[400px]"
               >
                 {/* Background image */}
                 <div className="absolute inset-0 bg-cover bg-center transition-transform duration-750 group-hover:scale-[1.05]" style={{ backgroundImage: `url(${style.image})` }} />
@@ -514,7 +514,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent z-10 transition-colors duration-500" />
 
                 {/* Content */}
-                <div className="absolute inset-x-0 bottom-0 p-6 z-20 flex flex-col justify-end h-full">
+                <div className="absolute inset-x-0 bottom-0 p-3 md:p-6 z-20 flex flex-col justify-end h-full">
                   {style.level && (
                     <span className="text-[10px] text-studio-gold font-semibold uppercase tracking-widest mb-1.5 font-sans">
                       {style.level}
@@ -533,7 +533,7 @@ export default function Home() {
                       e.preventDefault();
                       document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
                     }}
-                    className="mt-4 flex items-center space-x-1.5 text-xs text-studio-gold font-semibold uppercase tracking-wider group-hover:translate-x-1.5 transition-transform duration-300 font-sans"
+                    className="mt-2 md:mt-4 flex items-center space-x-1.5 text-xs text-studio-gold font-semibold uppercase tracking-wider group-hover:translate-x-1.5 transition-transform duration-300 font-sans"
                   >
                     <span>Inquire About Style</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -556,7 +556,7 @@ export default function Home() {
               <Sparkles className="w-3.5 h-3.5 text-studio-gold" />
               Community Reviews
             </span>
-            <h2 className="font-serif text-4xl md:text-5xl font-normal text-studio-charcoal">
+            <h2 className="font-serif text-3xl md:text-5xl font-normal text-studio-charcoal">
               What Our <span className="text-gold-gradient italic">Students Have to Say</span>
             </h2>
             <div className="flex items-center justify-center gap-3 pt-2 font-sans">
@@ -575,7 +575,7 @@ export default function Home() {
           {/* Testimonial Slider Container */}
           <div className="relative max-w-3xl mx-auto px-4 md:px-12">
             {/* Carousel Card */}
-            <div className="min-h-[380px] md:min-h-[320px] flex flex-col justify-between glassmorphism border border-[#A08246]/15 rounded-3xl p-8 md:p-12 bg-white shadow-md relative overflow-hidden">
+            <div className="min-h-[380px] md:min-h-[320px] flex flex-col justify-between glassmorphism border border-[#A08246]/15 rounded-3xl p-5 md:p-12 bg-white shadow-md relative overflow-hidden">
               {/* Google G Logo Background Decoration */}
               <div className="absolute top-6 right-6">
                 <svg className="w-8 h-8 opacity-10 text-studio-charcoal fill-current" viewBox="0 0 24 24">
@@ -601,7 +601,7 @@ export default function Home() {
                     </div>
 
                     {/* Review Text */}
-                    <p className="text-studio-charcoal/80 font-serif italic font-light text-base leading-relaxed whitespace-pre-line max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
+                    <p className="text-studio-charcoal/80 font-serif italic font-light text-sm md:text-base leading-relaxed whitespace-pre-line max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
                       "{googleReviews[activeReviewIndex].text}"
                     </p>
                   </div>
@@ -673,7 +673,7 @@ export default function Home() {
       <div className="classic-divider" />
 
       {/* 6. Call To Action Section */}
-      <section className="relative py-32 md:py-40 flex items-center justify-center overflow-hidden">
+      <section className="relative py-20 md:py-40 flex items-center justify-center overflow-hidden">
         {/* Deep dark background */}
         <div className="absolute inset-0 bg-studio-charcoal z-0" />
         {/* Subtle gold radial glow */}
@@ -689,7 +689,7 @@ export default function Home() {
             <div className="h-px w-12 bg-studio-gold/40" />
           </div>
 
-          <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight leading-[1.1] text-[#F5ECD7] mb-6">
+          <h2 className="font-serif text-3xl md:text-5xl lg:text-6xl font-normal tracking-tight leading-[1.1] text-[#F5ECD7] mb-6">
             Ready to awaken<br />
             <span className="italic font-light text-[#F5ECD7]/70">your artistic potential?</span>
           </h2>
