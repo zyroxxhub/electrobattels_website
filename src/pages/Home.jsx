@@ -335,7 +335,7 @@ export default function Home() {
                     style={{
                       position: 'absolute',
                       top: 0,
-                      left: 0
+                      left: isMobile ? '6%' : 0
                     }}
                     className={`w-[88%] md:w-[370px] h-[350px] md:h-[430px] rounded-3xl overflow-hidden border border-[#A08246]/15 shadow-xl transition-colors duration-500 ease-[0.16,1,0.3,1] ${
                       isActive 
