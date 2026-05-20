@@ -1,0 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Royal Beige Design System ─── */
+
+@layer base {
+  :root {
+    --royal-ivory:    #F5ECD7;
+    --royal-linen:    #E8D9B8;
+    --royal-gold:     #C9A84C;
+    --royal-gold-lt:  #DFC98A;
+    --royal-espresso: #2C1F0E;
+    --royal-camel:    #8B7355;
+  }
+
+  body {
+    background-color: var(--royal-ivory);
+    color: var(--royal-espresso);
+    font-family: 'Jost', sans-serif;
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    color: var(--royal-espresso);
+  }
+}
+
+@layer utilities {
+
+  /* ── Gold Gradient ── */
+  .text-gold-gradient {
+    background: linear-gradient(135deg, #DFC98A 0%, #C9A84C 45%, #9A7A2E 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .bg-gold-gradient {
+    background: linear-gradient(135deg, #DFC98A 0%, #C9A84C 45%, #9A7A2E 100%);
+  }
+
+  .text-purple-gradient {
+    background: linear-gradient(135deg, #C4B08A 0%, #5C4A2A 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Glassmorphism ── */
+  .glassmorphism {
+    background: rgba(245, 236, 215, 0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(201, 168, 76, 0.12);
+  }
+
+  .glassmorphism-gold {
+    background: rgba(245, 236, 215, 0.75);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(201, 168, 76, 0.20);
+    box-shadow: 0 10px 40px 0 rgba(201, 168, 76, 0.08);
+  }
+
+  .glassmorphism-purple {
+    background: rgba(232, 217, 184, 0.65);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(44, 31, 14, 0.08);
+    box-shadow: 0 10px 30px 0 rgba(44, 31, 14, 0.04);
+  }
+
+  /* ── Glow Effects ── */
+  .glow-gold {
+    box-shadow: 0 10px 40px -10px rgba(201, 168, 76, 0.30);
+  }
+
+  .glow-purple {
+    box-shadow: 0 10px 30px -10px rgba(44, 31, 14, 0.12);
+  }
+
+  /* ── Transitions ── */
+  .transition-apple {
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* ── Backgrounds ── */
+  .bg-classic-gradient {
+    background: linear-gradient(to bottom, #F5ECD7 0%, #E8D9B8 50%, #F5ECD7 100%);
+  }
+
+  /* ── Borders ── */
+  .classic-border {
+    border: 1px solid rgba(201, 168, 76, 0.22);
+  }
+
+  /* ── Section Divider ── */
+  .classic-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(201, 168, 76, 0.35) 50%, transparent);
+    width: 100%;
+    position: relative;
+  }
+
+  .classic-divider::after {
+    content: '✦';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #F5ECD7;
+    padding: 0 1.5rem;
+    color: #C9A84C;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── Cinzel accent labels ── */
+  .label-royal {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--royal-gold);
+    font-weight: 500;
+  }
+}
+
+/* ── Custom Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #F5ECD7; }
+::-webkit-scrollbar-thumb { background: #C9A84C; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #9A7A2E; }
+
+/* ── Custom scrollbar for review cards ── */
+.custom-scrollbar::-webkit-scrollbar { width: 3px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 2px; }
