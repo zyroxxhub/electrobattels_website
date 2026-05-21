@@ -9,7 +9,7 @@ import TermsConditions from './pages/TermsConditions';
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="flex flex-col min-h-screen bg-studio-black text-studio-charcoal">
+      <div className="flex flex-col min-h-screen bg-luxury-black text-luxury-white">
 
         {/* Navigation Bar */}
         <Navbar />

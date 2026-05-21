@@ -7,38 +7,32 @@ export default {
   theme: {
     extend: {
       colors: {
-        studio: {
-          black:   '#F5ECD7',   // Royal ivory — base canvas
-          dark:    '#E8D9B8',   // Antique linen — elevated panels
-          charcoal:'#2C1F0E',   // Deep espresso — primary text
-          gold: {
-            light:   '#DFC98A',
-            DEFAULT: '#C9A84C', // Burnished antique gold
-            dark:    '#9A7A2E',
-            glow:    'rgba(201,168,76,0.15)',
-          },
-          purple: {
-            light:   '#C4B08A',
-            DEFAULT: '#8B7355', // Warm camel
-            dark:    '#5C4A2A',
-            deep:    '#F5ECD7',
-          }
+        luxury: {
+          black: '#0A0A0C',
+          charcoal: '#121214',
+          graphite: '#1E1E22',
+          white: '#DCC5A0',
+          pearl: '#ECE8E1',
+          gold: '#C5A880',
+          goldDim: '#9E8665',
+          orange: '#8C7355',
+          amber: '#A68B6D',
+          silver: '#B8B0A4',
+          muted: '#8E8E93',
+          border: '#26262A',
         }
       },
       fontFamily: {
-        sans:   ['Jost', 'sans-serif'],
-        serif:  ['Cormorant Garamond', 'Georgia', 'serif'],
-        accent: ['Cinzel', 'serif'],
+        sans: ['Inter', 'Helvetica Neue', 'sans-serif'],
+        serif: ['Playfair Display', 'Cormorant Garamond', 'serif'],
       },
       letterSpacing: {
-        royal: '0.18em',
+        widest: '0.25em',
+        mega: '0.35em',
       },
-      boxShadow: {
-        'glass-gold':  '0 8px 32px 0 rgba(201,168,76,0.10)',
-        'glass-panel': '0 8px 32px 0 rgba(44,31,14,0.06)',
-        'glow-gold':   '0 4px 20px rgba(201,168,76,0.18)',
-        'royal':       '0 20px 60px -10px rgba(44,31,14,0.15)',
-      },
+      transitionTimingFunction: {
+        'slow-ease': 'cubic-bezier(0.16, 1, 0.3, 1)',
+      }
     },
   },
   plugins: [],

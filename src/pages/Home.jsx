@@ -1,723 +1,1086 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Award, 
-  ShieldCheck, 
-  MapPin, 
-  Clock, 
-  ArrowRight, 
-  Sparkles,
-  Play,
-  Flame,
-  Globe,
-  Compass,
-  ChevronLeft,
-  ChevronRight,
-  Star
-} from 'lucide-react';
-import GlassCard from '../components/GlassCard';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { ChevronLeft, ChevronRight, ArrowRight, X, Clock, User, Award, Sparkles, Calendar, Music, Flame, Crown, Compass, Zap, Star } from 'lucide-react';
 
-// Dance Styles for offered section
-const featuredStyles = [
-  {
-    title: 'Choreography Classes',
-    desc: 'Master advanced movement flows, visual storytelling, alignment, and physical expression with cinematic routines.',
-    image: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=800&auto=format&fit=crop',
+/* ─── Data ─────────────────────────────────────────────────────────── */
+export const featuredStyles = [
+  { 
+    title: 'Choreography Classes', 
+    desc: 'Master advanced movement flows, visual storytelling, alignment, and physical expression with cinematic routines.', 
+    image: '/choreography.png', 
     level: 'Intermediate to Advanced',
+    category: 'performance',
+    schedule: 'Mon / Wed / Fri • 7:00 PM - 8:30 PM',
+    mentor: 'Manu Rajesh',
+    icon: 'Music',
+    highlights: ['Cinematic storytelling & expressions', 'Advanced speed and musicality variations', 'Camera angles, sync & style adaptation']
   },
-  {
-    title: 'Zumba',
-    desc: 'Supercharge your cardiovascular health and dance fitness with high-energy Latin and world rhythm routines.',
-    image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=800&auto=format&fit=crop',
+  { 
+    title: 'Zumba', 
+    desc: 'Supercharge your cardiovascular health and dance fitness with high-energy Latin and world rhythm routines.', 
+    image: '/zumba.png', 
+    level: 'All Levels',
+    category: 'fitness',
+    schedule: 'Mon to Sat • 6:30 AM & 6:00 PM',
+    mentor: 'Nandana & Dhanesh Sir',
+    icon: 'Flame',
+    highlights: ['High-energy Latin-infused cardio burnout', 'Core strength, flexibility & body toning', 'Stress relief in a high-energy group vibe']
   },
-  {
-    title: 'Advanced Classes',
-    desc: 'Rigorous training programs for competitive soloists and crews looking for elite performance execution.',
-    image: 'https://images.unsplash.com/photo-1506157786151-b8491531f063?q=80&w=800&auto=format&fit=crop',
-    level: 'Professional Training',
+  { 
+    title: 'Advanced Classes', 
+    desc: 'Rigorous training programs for competitive soloists and crews looking for elite performance execution.', 
+    image: '/elite-training.png', 
+    level: 'Professional',
+    category: 'performance',
+    schedule: 'Sat & Sun • 10:00 AM - 1:00 PM',
+    mentor: 'Manu Rajesh & Dhanesh Master',
+    icon: 'Crown',
+    highlights: ['Elite crew formations & blocking systems', 'Stamina drills & precision performance mechanics', 'Solo improvisation, stage presence & battles']
   },
-  {
-    title: 'Youth Classes',
-    desc: 'Structured, highly encouraging training built specifically to inspire coordination and stamina in young dancers.',
-    image: 'https://images.unsplash.com/photo-1502224562085-639556652f33?q=80&w=800&auto=format&fit=crop',
-    level: 'Ages 8 - 16',
+  { 
+    title: 'Youth Classes', 
+    desc: 'Structured, highly encouraging training built specifically to inspire coordination and stamina in young dancers.', 
+    image: '/youth-academy.png', 
+    level: 'Ages 8 – 16',
+    category: 'youth',
+    schedule: 'Tue / Thu • 5:00 PM - 6:30 PM',
+    mentor: 'Asif Bro',
+    icon: 'Sparkles',
+    highlights: ['Youth groove, hand-eye coordination & balance', 'Creative expression games & rhythm foundation', 'Welcoming and highly encouraging atmosphere']
   },
-  {
-    title: 'Adult Lessons',
-    desc: 'Improve flexibility, posture, core strength, and graceful expression in a warm and welcoming space.',
-    image: 'https://images.unsplash.com/photo-1518834107812-67b0b7c58434?q=80&w=800&auto=format&fit=crop',
-  },
-  {
-    title: 'Hip Hop',
-    desc: 'Raw urban grooves, street style foundations, sharp locking-popping, and high-impact battle drills.',
-    image: 'https://images.unsplash.com/photo-1535525153412-5a42439a210d?q=80&w=800&auto=format&fit=crop',
-  },
-  {
-    title: 'Fitness Dance',
-    desc: 'Interval-style athletic drills mixed with contemporary routines to build strong posture and stamina.',
-    image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=800&auto=format&fit=crop',
-    level: 'Fitness & Conditioning',
-  },
-  {
-    title: 'Kids Dance',
-    desc: 'Nurture joy, fundamental musicality, body awareness, and creative play in our child-focused rooms.',
-    image: 'https://images.unsplash.com/photo-1502224562085-639556652f33?q=80&w=800&auto=format&fit=crop',
-    level: 'Ages 4 - 7',
-  },
-  {
-    title: 'Western Dance',
-    desc: 'Dynamic stage-performance routines merging commercial pop dance rhythms, rock, and stage production flows.',
-    image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=800&auto=format&fit=crop',
+  { 
+    title: 'Adult Lessons', 
+    desc: 'Improve flexibility, posture, core strength, and graceful expression in a warm and welcoming space designed for adults.', 
+    image: '/adult-foundations.png', 
     level: 'Beginner to Intermediate',
+    category: 'fitness',
+    schedule: 'Mon / Wed • 10:00 AM - 11:30 AM',
+    mentor: 'Nandana',
+    icon: 'Compass',
+    highlights: ['Warm, zero-judgment beginner environment', 'Basic coordination, posture & balance training', 'Gentle flexibility and slow groove routines']
+  },
+  { 
+    title: 'Hip Hop', 
+    desc: 'Raw urban grooves, street style foundations, sharp locking-popping, and high-impact battle drills.', 
+    image: '/hip-hop.png', 
+    level: 'Intermediate',
+    category: 'grooves',
+    schedule: 'Tue / Thu • 7:00 PM - 8:30 PM',
+    mentor: 'Dhanesh Sir & Asif Bro',
+    icon: 'Zap',
+    highlights: ['Raw bounce, rock & roll hip hop fundamentals', 'Body isolation, locking, and popping drills', 'Freestyle circle confidence & musicality training']
+  },
+  { 
+    title: 'Fitness Dance', 
+    desc: 'A high-energy fusion of dance and fitness routines that sculpt your body while keeping you grooving to the beat.', 
+    image: '/zumba.png', 
+    level: 'All Levels',
+    category: 'fitness',
+    schedule: 'Mon / Wed / Fri • 6:00 AM - 7:00 AM',
+    mentor: 'Nandana & Dhanesh Sir',
+    icon: 'Flame',
+    highlights: ['Full body cardio dance workouts', 'Toning, endurance & core strength training', 'Fun group sessions with motivating music']
+  },
+  { 
+    title: 'Kids Dance', 
+    desc: 'A fun, creative, and age-appropriate dance program that builds rhythm, confidence, and a lifelong love of movement in children.', 
+    image: '/youth-academy.png', 
+    level: 'Ages 4 – 10',
+    category: 'youth',
+    schedule: 'Sat & Sun • 9:00 AM - 10:30 AM',
+    mentor: 'Asif Bro & Nandana',
+    icon: 'Sparkles',
+    highlights: ['Age-appropriate fun & creative movement', 'Rhythm, coordination & body awareness games', 'Safe, encouraging & joyful learning space']
+  },
+  { 
+    title: 'Western Dance', 
+    desc: 'Explore contemporary and western dance styles blending jazz, freestyle, and modern techniques into expressive routines.', 
+    image: '/choreography.png', 
+    level: 'Beginner to Advanced',
+    category: 'performance',
+    schedule: 'Wed / Fri • 5:00 PM - 6:30 PM',
+    mentor: 'Manu Rajesh',
+    icon: 'Music',
+    highlights: ['Jazz, contemporary & modern freestyle styles', 'Stage performance & expressive movement', 'Solo & group routine choreography']
   },
 ];
-// Google Reviews
-// Google Reviews
+
 const googleReviews = [
-  {
-    name: 'Joseph Shane',
-    rating: 5,
-    date: '11 months ago',
-    text: `Zumba Fitness at Electrobattles – More Than Just a Workout! 🔥
-
-Our journey at Electrobattles Zumba Centre has been nothing short of amazing. This vibrant, high-energy space was founded by our beloved Late Rajesh Master, whose legacy now lives on through his talented son, Manu Rajesh.
-Manu isn’t just a dedicated instructor—he’s an expert in multiple dance forms and continues his father’s passion with unmatched energy and grace.
-
-We are also lucky to be trained by an amazing team: Dhanesh Sir, Asif Bro, and Nandana. Their passion, patience, and joyful teaching make every session a powerful and positive experience.
-
-Each class is so much more than just a Zumba workout. After a fun and dynamic half-hour Zumba session, we dive into learning a new cinematic dance routine every week.
-The best part? We wrap up each week with a Friday shoot—capturing our performances as beautiful memories we’ll cherish forever.
-
-And there’s more!
-Every second Saturday, all batches and branches come together for a combined session, full of energy and bonding. We also get the chance to perform on special occasions like Founder's Day and Onam celebrations, often held at banquet halls—true moments of joy and pride.
-Our annual tour brings all of us even closer, strengthening our friendships and creating unforgettable memories outside the studio too.
-
-More than just a fitness class, Electrobattles is a family. We motivate, support, and uplift each other—one dance step at a time. Each session is filled with laughter, rhythm, and togetherness.
-
-Feeling truly blessed to be part of this inspiring journey.
-Proud to say... I’m an Electrobattler for life! 💪🎶❤️`,
-  },
-  {
-    name: 'Smitha Nair',
-    rating: 5,
-    date: '11 months ago',
-    text: 'The classes are very vibrant, exhilarating and full of positive vibes.The approach of the masters is highly professional and conducive to developing a healthy body in a healthy mind. The classes are fun and at the same time provide the much required training for building up the endurance to become a skilled dancer.',
-  },
-  {
-    name: 'Bindu Sivanand',
-    rating: 5,
-    date: '5 months ago',
-    text: 'The dance class is awesome! . The teacher teaches cool moves step by step, and the music keeps everyone pumped up. I feel happy and energetic after each class, and I look forward to the next session. The vibe is super friendly, making it easy to join in and have fun.',
-  },
-  {
-    name: 'Lakshmy Kannan',
-    rating: 5,
-    date: '11 months ago',
-    text: "It's been one year since I joined electrobattles.In the busy schedule of work, this is purely a stress relief. The instructors are so friendly and Cooperative with all their students. Thank you dear masters for all the support and encouragement.",
-  },
-  {
-    name: 'Yohann Antony',
-    rating: 5,
-    date: '5 months ago',
-    text: 'Its an awesome experience with my wonderful zumba team and energatic n friendly masters. Friday session is just super kidu. Thank you all our masters and zumba mates ❤️❤️❤️❤️❤️',
-  },
-  {
-    name: 'Reena Malayil',
-    rating: 5,
-    date: '11 months ago',
-    text: 'It is so nice to be a part of this fitness group.All 4 masters are excellent in teaching..I enjoy each and every moment in this group..',
-  },
-  {
-    name: 'Nita Khona',
-    rating: 5,
-    date: '2 years ago',
-    text: 'It is very good for our health, i enjoy each and every moment, i joined electrobattles at the age of 50+, after joining electrobattles feels fit and energetic',
-  },
-  {
-    name: 'Vijay M',
-    rating: 5,
-    date: '5 months ago',
-    text: 'Highly recommend this Zumba class. Great music, fun moves, and a fantastic stress reliever. The instructor made everyone feel Good',
-  },
-  {
-    name: 'Sourabhya B pai',
-    rating: 5,
-    date: '10 months ago',
-    text: "I'm living my dream and my passion of dance with my daughter ❤️",
-  },
-  {
-    name: 'Mohammed Sayhan ST',
-    rating: 5,
-    date: '5 months ago',
-    text: 'Nice studio for dance and fitness in kochi',
-  },
-  {
-    name: 'Khona Viren',
-    rating: 5,
-    date: '5 months ago',
-    text: "1. Good class\n2. Great Ambience\n3. Very good masters",
-  }
+  { name: 'Joseph Shane', rating: 5, date: '11 months ago', text: `Zumba Fitness at Electrobattles – More Than Just a Workout!\n\nOur journey at Electrobattles Zumba Centre has been nothing short of amazing. This vibrant, high-energy space was founded by our beloved Late Rajesh Master, whose legacy now lives on through his talented son, Manu Rajesh.\n\nManu isn't just a dedicated instructor—he's an expert in multiple dance forms and continues his father's passion with unmatched energy and grace.\n\nWe are also lucky to be trained by an amazing team: Dhanesh Sir, Asif Bro, and Nandana. Their passion, patience, and joyful teaching make every session a powerful and positive experience.\n\nMore than just a fitness class, Electrobattles is a family. We motivate, support, and uplift each other—one dance step at a time.\n\nProud to say... I'm an Electrobattler for life!` },
+  { name: 'Smitha Nair', rating: 5, date: '11 months ago', text: 'The classes are very vibrant, exhilarating and full of positive vibes. The approach of the masters is highly professional and conducive to developing a healthy body in a healthy mind. The classes are fun and provide the much required training for building up the endurance to become a skilled dancer.' },
+  { name: 'Bindu Sivanand', rating: 5, date: '5 months ago', text: 'The dance class is awesome! The teacher teaches cool moves step by step, and the music keeps everyone pumped up. I feel happy and energetic after each class, and I look forward to the next session. The vibe is super friendly, making it easy to join in and have fun.' },
+  { name: 'Lakshmy Kannan', rating: 5, date: '11 months ago', text: "It's been one year since I joined Electrobattles. In the busy schedule of work, this is purely a stress relief. The instructors are so friendly and cooperative with all their students. Thank you dear masters for all the support and encouragement." },
+  { name: 'Vijay M', rating: 5, date: '5 months ago', text: '"Highly recommend this Zumba class. Great music, fun moves, and a fantastic stress reliever. The instructor made everyone feel Good"' },
 ];
 
 const galleryPreview = [
-  { url: '/studio-kids.jpg', tag: 'Studio Training Session' },
-  { url: '/stage-crew.jpg', tag: 'Stage Crew Performance' },
-  { url: '/logo-wall.jpg', tag: 'Signature Logo Wall' },
-  { url: '/camp-kids.jpg', tag: 'Summer Camp Certification' },
-  { url: '/fitness-group.jpg', tag: 'Fitness Training Group' },
+  { url: '/team-1.jpg', tag: 'Electrobattles Family' },
+  { url: '/team-2.jpg', tag: 'Electrobattles Family' },
+  { url: '/team-3.jpg', tag: 'Electrobattles Family' },
+  { url: '/team-4.jpg', tag: 'Electrobattles Family' },
+  { url: '/team-5.jpg', tag: 'Electrobattles Family' },
+  { url: '/team-6.jpg', tag: 'Electrobattles Family' },
 ];
 
-export default function Home() {
-  const [deck, setDeck] = useState([0, 1, 2, 3, 4]);
-  const [swappingCardId, setSwappingCardId] = useState(null);
-  const [isMobile, setIsMobile] = useState(false);
-  const [activeReviewIndex, setActiveReviewIndex] = useState(0);
+/* ─── Apple-style Easing ────────────────────────────────────────── */
+const easePremium = [0.16, 1, 0.3, 1];
 
-  useEffect(() => {
-    const reviewTimer = setInterval(() => {
-      setActiveReviewIndex((prev) => (prev + 1) % googleReviews.length);
-    }, 5500);
-    return () => clearInterval(reviewTimer);
-  }, []);
-
-  const handleReviewPrev = () => {
-    setActiveReviewIndex((prev) => (prev - 1 + googleReviews.length) % googleReviews.length);
+/* ─── Premium Animated Text Component ───────────────────────────── */
+const RevealText = ({ text, className, delay = 0 }) => {
+  const words = text.split(" ");
+  
+  const container = {
+    hidden: { opacity: 0 },
+    visible: (i = 1) => ({
+      opacity: 1,
+      transition: { staggerChildren: 0.12, delayChildren: delay * i },
+    }),
   };
-
-  const handleReviewNext = () => {
-    setActiveReviewIndex((prev) => (prev + 1) % googleReviews.length);
+  
+  const child = {
+    visible: { opacity: 1, y: 0, transition: { type: "spring", damping: 30, stiffness: 150 } },
+    hidden: { opacity: 0, y: 40, transition: { type: "spring", damping: 30, stiffness: 150 } },
   };
-
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const triggerSwap = () => {
-    if (swappingCardId !== null) return;
-    const topCardId = deck[0];
-    setSwappingCardId(topCardId);
-    setTimeout(() => {
-      setDeck((prev) => {
-        const nextDeck = [...prev];
-        const top = nextDeck.shift();
-        nextDeck.push(top);
-        return nextDeck;
-      });
-      setSwappingCardId(null);
-    }, 300);
-  };
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      triggerSwap();
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [deck, swappingCardId]);
 
   return (
-    <div className="relative overflow-hidden bg-classic-gradient text-studio-charcoal font-serif">
+    <motion.span
+      className={className}
+      variants={container}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-50px" }}
+    >
+      {words.map((word, index) => (
+        <motion.span variants={child} key={index} className="inline-block mr-[0.25em]">
+          {word}
+        </motion.span>
+      ))}
+    </motion.span>
+  );
+};
+
+/* ─── Magnetic Button (Smooth) ──────────────────────────────────── */
+const MagneticBtn = ({ children, href }) => {
+  const ref = useRef(null);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+  const handleMouse = (e) => {
+    const { clientX, clientY } = e;
+    const { height, width, left, top } = ref.current.getBoundingClientRect();
+    const middleX = clientX - (left + width / 2);
+    const middleY = clientY - (top + height / 2);
+    setPosition({ x: middleX * 0.2, y: middleY * 0.2 });
+  };
+
+  const reset = () => {
+    setPosition({ x: 0, y: 0 });
+  };
+
+  return (
+    <motion.a
+      href={href}
+      ref={ref}
+      onMouseMove={handleMouse}
+      onMouseLeave={reset}
+      animate={{ x: position.x, y: position.y }}
+      transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
+      className="btn-luxury inline-flex items-center group overflow-hidden relative"
+    >
+      <div className="absolute inset-0 bg-luxury-white origin-bottom scale-y-0 group-hover:scale-y-100 transition-transform duration-500 ease-[0.16,1,0.3,1] z-0" />
+      <span className="relative z-10 group-hover:text-luxury-black transition-colors duration-500 ease-[0.16,1,0.3,1] flex items-center gap-3">
+        {children}
+        <ArrowRight className="w-4 h-4 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 ease-[0.16,1,0.3,1]" />
+      </span>
+    </motion.a>
+  );
+};
+
+/* ─── Categories ────────────────────────────────────────────────── */
+const categories = [
+  { id: 'all', label: 'All Styles' },
+  { id: 'performance', label: 'Elite Performance' },
+  { id: 'grooves', label: 'Grooves & Street' },
+  { id: 'fitness', label: 'Fitness & Foundations' },
+  { id: 'youth', label: 'Youth & Kids' },
+];
+
+/* ─── Icon Map ──────────────────────────────────────────────────── */
+const IconMap = {
+  Music: Music,
+  Flame: Flame,
+  Crown: Crown,
+  Sparkles: Sparkles,
+  Compass: Compass,
+  Zap: Zap
+};
+
+/* ─── Cinematic Split-Screen Showcase ──────────────────────────────── */
+function CinematicShowcase({ styles, onSelectStyle }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [progressKey, setProgressKey] = useState(0);
+  const activeStyle = styles[activeIndex] || styles[0];
+  const IconComponent = IconMap[activeStyle?.icon] || Sparkles;
+
+  // Auto-cycle through styles every 6 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveIndex(prev => (prev + 1) % styles.length);
+      setProgressKey(prev => prev + 1);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [styles.length]);
+
+  const handleSelect = (index) => {
+    setActiveIndex(index);
+    setProgressKey(prev => prev + 1);
+  };
+
+  if (!styles.length) return null;
+
+  return (
+    <div className="w-full">
+      {/* ── Desktop: Split Screen ── */}
+      <div className="hidden lg:grid grid-cols-12 gap-0 min-h-[620px] border border-luxury-border/40 relative overflow-hidden">
+        
+        {/* Left — Discipline Slate Navigator */}
+        <div className="col-span-4 bg-luxury-charcoal border-r border-luxury-border/40 flex flex-col">
+          {/* Section Label */}
+          <div className="px-8 pt-8 pb-6 border-b border-luxury-border/30">
+            <span className="font-mono text-[9px] tracking-mega text-luxury-gold/40 uppercase select-none">
+              EB // DISCIPLINES.INDEX
+            </span>
+          </div>
+          
+          {/* Style List */}
+          <div className="flex-grow flex flex-col">
+            {styles.map((s, i) => {
+              const isActive = i === activeIndex;
+              const ItemIcon = IconMap[s.icon] || Sparkles;
+              return (
+                <button
+                  key={s.title}
+                  onClick={() => handleSelect(i)}
+                  className={`group relative flex items-center gap-5 px-8 py-5 text-left transition-all duration-500 border-b border-luxury-border/20 ${
+                    isActive 
+                      ? 'bg-luxury-graphite/80' 
+                      : 'hover:bg-luxury-graphite/40'
+                  }`}
+                >
+                  {/* Active Indicator Bar */}
+                  <div className={`absolute left-0 top-0 bottom-0 w-[2px] transition-all duration-500 ${
+                    isActive ? 'bg-luxury-gold' : 'bg-transparent'
+                  }`} />
+                  
+                  {/* Progress fill for active item */}
+                  {isActive && (
+                    <div className="absolute left-0 top-0 bottom-0 w-[2px] overflow-hidden">
+                      <div key={progressKey} className="w-full bg-luxury-gold/40 animate-fill-progress" />
+                    </div>
+                  )}
+
+                  {/* Index Number */}
+                  <span className={`font-mono text-[11px] tracking-wider transition-colors duration-500 min-w-[28px] ${
+                    isActive ? 'text-luxury-gold' : 'text-luxury-muted/40'
+                  }`}>
+                    0{i + 1}
+                  </span>
+
+                  {/* Icon */}
+                  <div className={`p-2 border transition-all duration-500 ${
+                    isActive 
+                      ? 'border-luxury-gold/30 bg-luxury-gold/5 text-luxury-gold' 
+                      : 'border-luxury-border/40 bg-transparent text-luxury-muted/60 group-hover:text-luxury-muted'
+                  }`}>
+                    <ItemIcon className="w-3.5 h-3.5 stroke-[1.5]" />
+                  </div>
+
+                  {/* Title & Level */}
+                  <div className="flex-grow min-w-0">
+                    <h4 className={`font-serif text-sm tracking-tight transition-colors duration-500 truncate ${
+                      isActive ? 'text-luxury-white italic' : 'text-luxury-muted group-hover:text-luxury-white/80'
+                    }`}>
+                      {s.title}
+                    </h4>
+                    <span className={`text-[8px] uppercase tracking-widest transition-colors duration-500 ${
+                      isActive ? 'text-luxury-gold/80' : 'text-luxury-muted/40'
+                    }`}>
+                      {s.level}
+                    </span>
+                  </div>
+
+                  {/* Arrow indicator */}
+                  <ArrowRight className={`w-3.5 h-3.5 transition-all duration-500 flex-shrink-0 ${
+                    isActive ? 'text-luxury-gold opacity-100 translate-x-0' : 'text-luxury-muted/30 opacity-0 -translate-x-2'
+                  }`} />
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Bottom Action */}
+          <div className="px-8 py-6 border-t border-luxury-border/30 bg-luxury-black/40">
+            <button 
+              onClick={() => onSelectStyle(activeStyle)}
+              className="w-full btn-luxury text-[9px] py-3"
+            >
+              Explore Syllabus
+            </button>
+          </div>
+        </div>
+
+        {/* Right — Cinematic Spotlight Canvas */}
+        <div className="col-span-8 relative bg-luxury-black overflow-hidden">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeIndex}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8, ease: easePremium }}
+              className="absolute inset-0 flex flex-col"
+            >
+              {/* Main Image Canvas */}
+              <div className="relative flex-grow overflow-hidden">
+                <motion.img
+                  key={`img-${activeIndex}`}
+                  initial={{ scale: 1.1, opacity: 0, filter: 'blur(8px)' }}
+                  animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
+                  transition={{ duration: 1.4, ease: easePremium }}
+                  src={activeStyle.image}
+                  alt={activeStyle.title}
+                  className="w-full h-full object-cover"
+                />
+                {/* Gradient overlays for text readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-luxury-black via-luxury-black/40 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-luxury-black/60 via-transparent to-transparent" />
+
+                {/* Decorative corner label */}
+                <div className="absolute top-8 right-8 font-mono text-[9px] tracking-mega text-luxury-white/15 select-none">
+                  EB // STYLE.0{activeIndex + 1}
+                </div>
+
+                {/* Category badge */}
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.8, ease: easePremium }}
+                  className="absolute top-8 left-8"
+                >
+                  <span className="text-[8px] uppercase tracking-[0.25em] text-luxury-gold/90 px-3 py-1.5 border border-luxury-gold/20 bg-luxury-black/50 backdrop-blur-sm">
+                    {activeStyle.category === 'performance' ? 'Elite Performance' : activeStyle.category === 'grooves' ? 'Grooves & Street' : activeStyle.category === 'youth' ? 'Youth & Kids' : 'Fitness & Foundations'}
+                  </span>
+                </motion.div>
+              </div>
+
+              {/* Bottom Details Overlay — Positioned over the image gradient */}
+              <div className="absolute bottom-0 left-0 right-0 p-8 md:p-10">
+                <div className="flex flex-col gap-6">
+                  {/* Title Block */}
+                  <div className="space-y-3">
+                    {/* Level badge */}
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2, duration: 0.8, ease: easePremium }}
+                      className="flex items-center gap-2"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-luxury-gold animate-pulse-glow" />
+                      <span className="text-[8px] tracking-mega uppercase text-luxury-gold font-medium">{activeStyle.level}</span>
+                    </motion.div>
+
+                    <motion.h3
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.15, duration: 1, ease: easePremium }}
+                      className="font-serif text-4xl md:text-5xl xl:text-6xl text-luxury-white tracking-tight leading-none italic"
+                    >
+                      {activeStyle.title}
+                    </motion.h3>
+
+                    <motion.p
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3, duration: 0.8, ease: easePremium }}
+                      className="font-sans font-light text-luxury-muted text-sm max-w-md leading-relaxed"
+                    >
+                      {activeStyle.desc}
+                    </motion.p>
+                  </div>
+
+                  {/* Metadata Row */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.45, duration: 0.8, ease: easePremium }}
+                    className="flex flex-wrap items-center gap-6 pt-4 border-t border-luxury-white/10"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-3.5 h-3.5 text-luxury-gold/70 stroke-[1.5]" />
+                      <span className="font-sans text-[10px] text-luxury-white/70 tracking-wide">{activeStyle.schedule}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <User className="w-3.5 h-3.5 text-luxury-gold/70 stroke-[1.5]" />
+                      <span className="font-sans text-[10px] text-luxury-white/70 tracking-wide">{activeStyle.mentor}</span>
+                    </div>
+
+                    {/* Highlights chips */}
+                    <div className="hidden xl:flex items-center gap-2 ml-auto">
+                      {activeStyle.highlights.slice(0, 2).map((h, i) => (
+                        <motion.span
+                          key={i}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.5 + i * 0.1, duration: 0.6, ease: easePremium }}
+                          className="text-[9px] px-3 py-1.5 border border-luxury-border/50 bg-luxury-black/60 backdrop-blur-sm text-luxury-muted tracking-wide"
+                        >
+                          {h}
+                        </motion.span>
+                      ))}
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* ── Mobile: Cinematic Lookbook Cards ── */}
+        <div className="flex flex-col gap-8 lg:hidden">
+        {styles.map((s, i) => {
+          const ItemIcon = IconMap[s.icon] || Sparkles;
+          return (
+            <motion.div
+              key={s.title}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-30px' }}
+              transition={{ duration: 0.8, delay: i * 0.08, ease: easePremium }}
+              onClick={() => onSelectStyle(s)}
+              className="group cursor-pointer relative overflow-hidden border border-luxury-border/40 bg-luxury-charcoal"
+            >
+              {/* Image Section */}
+              <div className="relative h-[260px] sm:h-[300px] overflow-hidden flex items-center justify-center bg-luxury-charcoal/10">
+                <img
+                  src={s.image}
+                  alt={s.title}
+                  className="max-w-full max-h-full object-contain transition-transform duration-[1200ms] ease-slow-ease group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-luxury-charcoal via-luxury-charcoal/30 to-transparent" />
+                
+                {/* Floating category badge */}
+                <div className="absolute top-4 left-4">
+                  <span className="text-[7px] uppercase tracking-[0.2em] text-luxury-gold/90 px-2.5 py-1 border border-luxury-gold/20 bg-luxury-black/60 backdrop-blur-sm">
+                    {s.category === 'performance' ? 'Elite Performance' : s.category === 'grooves' ? 'Grooves & Street' : s.category === 'youth' ? 'Youth & Kids' : 'Fitness & Foundations'}
+                  </span>
+                </div>
+
+                {/* Index tag */}
+                <div className="absolute top-4 right-4 font-mono text-[9px] tracking-mega text-luxury-white/20 select-none">
+                  0{i + 1}
+                </div>
+              </div>
+
+              {/* Content Section */}
+              <div className="p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-1 h-1 rounded-full bg-luxury-gold animate-pulse-glow" />
+                      <span className="text-[7px] tracking-mega uppercase text-luxury-gold font-medium">{s.level}</span>
+                    </div>
+                    <h3 className="font-serif text-xl sm:text-2xl text-luxury-white tracking-tight leading-tight italic group-hover:text-luxury-gold transition-colors duration-500">
+                      {s.title}
+                    </h3>
+                  </div>
+                  <div className="p-2 border border-luxury-border/40 text-luxury-gold/60 group-hover:border-luxury-gold/30 group-hover:text-luxury-gold transition-all duration-500">
+                    <ItemIcon className="w-4 h-4 stroke-[1.5]" />
+                  </div>
+                </div>
+
+                <p className="font-sans font-light text-luxury-muted text-xs leading-relaxed line-clamp-2 group-hover:text-luxury-white/70 transition-colors duration-500">
+                  {s.desc}
+                </p>
+
+                {/* Bottom meta bar with slide-up CTA */}
+                <div className="pt-4 border-t border-luxury-border/30 flex items-center justify-between text-[10px] text-luxury-muted tracking-wide font-sans overflow-hidden relative h-5 select-none">
+                  <div className="flex items-center justify-between w-full absolute inset-0 group-hover:translate-y-5 transition-transform duration-500 ease-[0.16,1,0.3,1]">
+                    <span className="truncate max-w-[55%]">Instructor: <strong className="text-white/80 font-medium">{s.mentor}</strong></span>
+                    <span className="text-luxury-gold/80 font-medium">{s.schedule.split('•')[0]}</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-2 w-full absolute inset-0 translate-y-5 group-hover:translate-y-0 transition-transform duration-500 ease-[0.16,1,0.3,1] text-luxury-gold font-medium tracking-[0.25em] uppercase text-[9px]">
+                    <span>View Syllabus</span>
+                    <ArrowRight className="w-3 h-3 -rotate-45" />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Home ──────────────────────────────────────────────────────── */
+export default function Home() {
+  const [review, setReview] = useState(0);
+  const [deck, setDeck] = useState([0, 1, 2, 3, 4, 5]);
+  const [swapping, setSwap] = useState(null);
+  const [mobile, setMobile] = useState(false);
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [selectedStyle, setSelectedStyle] = useState(null);
+  const { scrollYProgress } = useScroll();
+  
+  // Adjusted Parallax: No travel on mobile to prevent excessive zoom
+  const heroBgY = useTransform(scrollYProgress, [0, 1], ["0%", mobile ? "0%" : "30%"]);
+
+  // Mobile detection
+  useEffect(() => {
+    const fn = () => setMobile(window.innerWidth < 1024);
+    fn(); window.addEventListener('resize', fn);
+    return () => window.removeEventListener('resize', fn);
+  }, []);
+
+  // Review auto-play
+  useEffect(() => {
+    const t = setInterval(() => setReview(p => (p + 1) % googleReviews.length), 8000);
+    return () => clearInterval(t);
+  }, []);
+
+  // Card Swapping Logic
+  const triggerSwap = useCallback(() => {
+    if (swapping !== null) return;
+    const top = deck[0];
+    setSwap(top);
+    setTimeout(() => {
+      setDeck(p => { const d = [...p]; d.push(d.shift()); return d; });
+      setSwap(null);
+    }, 450);
+  }, [deck, swapping]);
+
+  useEffect(() => {
+    const t = setInterval(triggerSwap, 6000);
+    return () => clearInterval(t);
+  }, [triggerSwap]);
+
+  // Filtered styles for the active category
+  const filteredStyles = activeCategory === 'all' 
+    ? featuredStyles 
+    : featuredStyles.filter(s => s.category === activeCategory);
+
+  return (
+    <div className="bg-luxury-black font-sans min-h-screen overflow-x-hidden selection:bg-luxury-gold/30 selection:text-luxury-white">
       
-      {/* 1. Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        {/* Background Image with Light & Gradient Overlays */}
-        <div 
-          className="absolute inset-0 bg-no-repeat opacity-[0.9] pointer-events-none z-0 mix-blend-multiply"
-          style={{ 
-            backgroundImage: isMobile ? `url('/logo-wall-premium.jpg')` : `url('/logo-wall-right.png')`,
-            backgroundPosition: isMobile ? 'top center' : 'center 0%',
-            backgroundSize: isMobile ? '150% auto' : 'cover',
-            WebkitMaskImage: isMobile ? 'linear-gradient(to bottom, black 0%, black 30%, transparent 60%)' : 'radial-gradient(circle at 75% 50%, black 50%, transparent 95%)',
-            maskImage: isMobile ? 'linear-gradient(to bottom, black 0%, black 30%, transparent 60%)' : 'radial-gradient(circle at 75% 50%, black 50%, transparent 95%)'
-          }}
-        />
-        <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-[#F5ECD7] via-[#F5ECD7]/90 to-transparent z-10 pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#F5ECD7] via-transparent to-[#F5ECD7]/25 z-10 pointer-events-none" />
-        {/* Mobile-only extra overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#F5ECD7] via-[#F5ECD7]/80 to-transparent z-10 md:hidden pointer-events-none" />
+      {/* ════════════════════════════════════════
+          §1  HERO
+      ════════════════════════════════════════ */}
+      <section className="relative min-h-[100svh] flex items-center justify-center pt-24 pb-12 overflow-hidden">
+        {/* Ambient Glowing Sphere */}
+        <div className="glow-ambient animate-float-glow w-[300px] h-[300px] sm:w-[650px] sm:h-[650px] top-[10%] left-[15%] opacity-[0.25]" />
+        
+        {/* Parallax Background */}
+        <motion.div 
+          className="absolute inset-0 z-0 opacity-[0.35]"
+          style={{ y: heroBgY }}
+        >
+          {/* Background Image: Responsive full-cover with a slight zoom on mobile */}
+          <img 
+            src="/logo-wall-premium.jpg" 
+            alt="Studio Background" 
+            className="w-full h-full md:h-[120%] object-cover grayscale object-top transform scale-[1.15] md:scale-105 md:translate-y-[8%]"
+            onError={(e) => {
+              e.currentTarget.src = "https://images.unsplash.com/photo-1547153760-18fc86324498?q=80&w=2000&auto=format&fit=crop";
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-luxury-black via-luxury-black/60 to-luxury-black/30" />
+          {/* Extra bottom shadow for mobile to make text pop more */}
+          <div className="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-luxury-black via-luxury-black/90 to-transparent md:hidden" />
+        </motion.div>
 
-        {/* Subtle champagne ambient glow point */}
-        <div className="absolute bottom-1/4 left-1/4 w-[350px] h-[350px] bg-studio-gold/5 rounded-full blur-[100px] pointer-events-none z-10" />
-
-        {/* Hero Content */}
-        <div className="relative max-w-7xl mx-auto px-6 md:px-12 w-full z-20 pt-56 md:pt-24 flex flex-col items-start text-left">
-
-          <motion.h1
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.4, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="font-serif text-[3rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] font-normal tracking-[-0.02em] leading-[1.08] mb-8 text-studio-charcoal"
-          >
-            Where movement<br />
-            <span className="font-light italic text-studio-charcoal/75">becomes artistry.</span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="font-sans font-light text-sm md:text-base text-studio-charcoal/55 max-w-[360px] leading-[2] tracking-[0.02em] mb-14"
-          >
-            The ultimate sanctuary for elite dance training — where raw emotion meets world-class mentorship.
-          </motion.p>
-
+        <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 w-full flex flex-col items-center text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 1.5, ease: easePremium }}
+            className="w-full max-w-4xl mx-auto"
           >
-            <a
-              href="#footer"
-              className="group flex items-center gap-4"
+            <h1 className="font-serif text-[clamp(3.2rem,10vw,8.5rem)] font-light text-luxury-white leading-[1.05] mb-6 md:mb-8 tracking-tight px-4">
+              <RevealText text="The Art of" className="block" delay={0.1} />
+              <RevealText text="Movement" className="block italic text-luxury-muted" delay={0.2} />
+            </h1>
+            
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1, duration: 1.5, ease: easePremium }}
+              className="font-sans font-light text-luxury-muted max-w-lg mx-auto text-[0.8rem] sm:text-sm md:text-base lg:text-lg leading-[1.8] sm:leading-[2] tracking-wide mb-12 md:mb-16 px-6"
             >
-              <span className="w-8 h-[1px] bg-studio-charcoal/60 group-hover:w-14 transition-all duration-700 ease-[0.16,1,0.3,1]" />
-              <span className="font-sans font-semibold text-[10px] uppercase tracking-[0.3em] text-studio-charcoal/80 group-hover:text-studio-charcoal transition-colors duration-500">
-                Join The Academy
-              </span>
-              <ArrowRight className="w-3.5 h-3.5 text-studio-charcoal/40 group-hover:text-studio-charcoal group-hover:translate-x-1.5 transition-all duration-500" />
-            </a>
+              An elite sanctuary for dance and artistic expression. Where technical precision meets raw emotion under world-class mentorship.
+            </motion.p>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.2, duration: 1.5, ease: easePremium }}
+            >
+              <MagneticBtn href="#footer">
+                Discover the Academy
+              </MagneticBtn>
+            </motion.div>
           </motion.div>
         </div>
 
-
+        {/* Scroll Indicator */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2, duration: 2 }}
+          className="absolute bottom-8 md:bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3"
+        >
+          <span className="text-[9px] uppercase tracking-[0.3em] text-luxury-muted">Scroll</span>
+          <div className="w-[1px] h-10 md:h-12 bg-luxury-border overflow-hidden">
+            <motion.div 
+              animate={{ y: [0, 48, 48], opacity: [0, 1, 0] }}
+              transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+              className="w-full h-1/2 bg-luxury-gold"
+            />
+          </div>
+        </motion.div>
       </section>
 
-      <div className="classic-divider" />
-
-      {/* 2. About the Studio Section */}
-      <section id="about" className="py-24 md:py-32 relative">
+      {/* ════════════════════════════════════════
+          §2  PHILOSOPHY (ABOUT)
+      ════════════════════════════════════════ */}
+      <section id="about" className="py-20 md:py-48 bg-luxury-black relative z-20 overflow-hidden">
+        {/* Ambient Glowing Sphere */}
+        <div className="glow-ambient animate-float-glow w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] top-[10%] right-[-10%] opacity-35" style={{ animationDelay: '-10s' }} />
+        
         <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Left Column: Fluid Layout Swapping Stacked Card Deck */}
-            <div className="relative w-full h-[430px] md:h-[480px]">
-              {galleryPreview.map((pic, idx) => {
-                const position = deck.indexOf(idx);
-                const isSwapping = idx === swappingCardId;
-                const isActive = position === 0;
-                
-                // Calculate dynamic motion configurations
-                let cardAnimate = {};
-                if (isSwapping) {
-                  cardAnimate = {
-                    x: isMobile ? 260 : 360,
-                    y: -25,
-                    rotate: 15,
-                    scale: 0.95,
-                    opacity: 0,
-                    zIndex: 50
-                  };
-                } else {
-                  if (position === 0) {
-                    cardAnimate = { x: 0, y: 0, rotate: 0, scale: 1, opacity: 1, zIndex: 40 };
-                  } else if (position === 1) {
-                    cardAnimate = { x: isMobile ? -8 : -14, y: isMobile ? 8 : 14, rotate: -3, scale: 0.96, opacity: 0.88, zIndex: 30 };
-                  } else if (position === 2) {
-                    cardAnimate = { x: isMobile ? -16 : -28, y: isMobile ? 16 : 28, rotate: -6, scale: 0.92, opacity: 0.65, zIndex: 20 };
-                  } else {
-                    cardAnimate = { x: isMobile ? -24 : -42, y: isMobile ? 24 : 42, rotate: -9, scale: 0.88, opacity: 0, zIndex: 10 };
-                  }
-                }
-
-                return (
-                  <motion.div
-                    key={pic.url}
-                    animate={cardAnimate}
-                    transition={{
-                      type: 'spring',
-                      stiffness: 180,
-                      damping: 24
-                    }}
-                    onClick={() => {
-                      if (isActive) triggerSwap();
-                    }}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: isMobile ? '6%' : 0
-                    }}
-                    className={`w-[88%] md:w-[370px] h-[350px] md:h-[430px] rounded-3xl overflow-hidden border border-[#A08246]/15 shadow-xl transition-colors duration-500 ease-[0.16,1,0.3,1] ${
-                      isActive 
-                        ? 'cursor-pointer hover:border-studio-gold/60 shadow-md' 
-                        : 'pointer-events-none'
-                    }`}
-                  >
-                    <div className="relative w-full h-full bg-studio-dark">
-                      {/* Image */}
+          <div className="flex flex-col lg:flex-row gap-16 lg:gap-32 items-center">
+            
+            {/* ── Text Block ── */}
+            <div className="w-full lg:w-1/2 space-y-10 md:space-y-12 order-2 lg:order-1">
+              <motion.div 
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false, amount: 0.2 }}
+                transition={{ duration: 1.5, ease: easePremium }}
+                className="space-y-6"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-8 h-[1px] bg-luxury-gold/50" />
+                  <span className="text-editorial-caption text-luxury-gold block">Our Philosophy</span>
+                </div>
+                <h2 className="font-serif text-[clamp(2.5rem,6vw,5rem)] text-luxury-white leading-[1.05] font-light tracking-tight">
+                  Elevating <br className="hidden sm:block"/><span className="italic text-luxury-muted">every step.</span>
+                </h2>
+              </motion.div>
+ 
+              <motion.p 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false, amount: 0.2 }}
+                transition={{ duration: 1.5, delay: 0.1, ease: easePremium }}
+                className="font-sans font-light text-luxury-muted leading-[1.8] md:leading-[2.2] max-w-xl text-[0.85rem] md:text-base lg:text-lg"
+              >
+                Electrobattles is more than a studio; it is a discipline. We believe that true artistry is forged in the intersection of rigorous technique and unrestrained passion. For over three decades, we have cultivated an environment that demands excellence while nurturing the individual spirit.
+              </motion.p>
+ 
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false, amount: 0.2 }}
+                transition={{ duration: 1.5, delay: 0.2, ease: easePremium }}
+                className="grid grid-cols-2 gap-8 pt-8 md:pt-10 border-t border-luxury-border/50"
+              >
+                <div>
+                  <span className="block font-serif text-4xl md:text-6xl text-luxury-white mb-2 md:mb-3">500+</span>
+                  <span className="text-editorial-caption text-luxury-muted">Alumni</span>
+                </div>
+                <div>
+                  <span className="block font-serif text-4xl md:text-6xl text-luxury-white mb-2 md:mb-3">1987</span>
+                  <span className="text-editorial-caption text-luxury-muted">Founded</span>
+                </div>
+              </motion.div>
+            </div>
+ 
+            {/* ── Swapping Card Deck ── */}
+            <div className="w-full lg:w-1/2 flex justify-center lg:justify-end order-1 lg:order-2 h-auto sm:h-auto md:h-auto lg:h-auto relative mt-8 lg:mt-0">
+                <div className="relative w-full max-w-[620px] aspect-[4/3] flex items-center justify-center overflow-hidden rounded-lg border-2 border-luxury-gold/30 bg-luxury-black/80 backdrop-blur-md shadow-2xl transition-all duration-200">
+                {galleryPreview.map((pic, idx) => {
+                  const pos = deck.indexOf(idx);
+                  const isSwapping = idx === swapping;
+                  const isTop = pos === 0;
+                  
+                  const offsets = [
+                    { x: 0, y: 0, rotate: 0, scale: 1, opacity: 1 },
+                    { x: mobile ? 12 : 28, y: mobile ? -12 : -28, rotate: 4, scale: 0.96, opacity: 0.8 },
+                    { x: mobile ? 24 : 56, y: mobile ? -24 : -56, rotate: 8, scale: 0.92, opacity: 0.5 },
+                    { x: mobile ? 36 : 84, y: mobile ? -36 : -84, rotate: 12, scale: 0.88, opacity: 0 },
+                    { x: mobile ? 36 : 84, y: mobile ? -36 : -84, rotate: 12, scale: 0.88, opacity: 0 },
+                    { x: mobile ? 36 : 84, y: mobile ? -36 : -84, rotate: 12, scale: 0.88, opacity: 0 },
+                  ];
+ 
+                  const anim = isSwapping
+                    ? { x: mobile ? -120 : -350, y: mobile ? -20 : -80, rotate: -15, scale: 0.95, opacity: 0, zIndex: 50 } 
+                    : { ...offsets[Math.min(pos, 5)], zIndex: 40 - pos };
+ 
+                  return (
+                    <motion.div
+                      key={pic.url}
+                      animate={anim}
+                      transition={{ type: 'spring', stiffness: 200, damping: 28, mass: 1 }}
+                      onClick={() => isTop && triggerSwap()}
+                      className={`absolute inset-0 w-full h-full border-2 border-luxury-gold/30 bg-luxury-black/80 backdrop-blur-md rounded-lg shadow-2xl overflow-hidden transition-all duration-200 ${isTop ? 'cursor-pointer shadow-[0_15px_40px_rgba(197,168,128,0.2)] md:shadow-[0_20px_50px_rgba(197,168,128,0.25)]' : 'pointer-events-none'}`}
+                    >
                       <img 
                         src={pic.url} 
                         alt={pic.tag} 
-                        className="w-full h-full object-cover select-none"
+                        className="w-full h-full object-contain transition-all duration-1000 ease-[0.16,1,0.3,1]" 
+                        onError={(e) => {
+                           e.currentTarget.src = "https://images.unsplash.com/photo-1547153760-18fc86324498?q=80&w=800&auto=format&fit=crop";
+                        }}
                       />
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span className="text-luxury-gold text-sm font-medium bg-luxury-black/60 px-2 py-1 rounded">Explore</span>
+                      </div>
+                      
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
+ 
+          </div>
+        </div>
+      </section>
 
-                      {/* Gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-studio-black/80 via-transparent to-transparent pointer-events-none" />
-                    </div>
-                  </motion.div>
+      {/* ════════════════════════════════════════
+          §3  DISCIPLINES — Cinematic Split-Screen Showcase
+      ════════════════════════════════════════ */}
+      <section id="classes" className="py-24 md:py-48 bg-luxury-black relative overflow-hidden">
+        {/* Ambient Glowing Spheres */}
+        <div className="glow-ambient animate-float-glow w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] -top-12 -left-12 opacity-30" style={{ animationDelay: '-15s' }} />
+        <div className="glow-ambient animate-float-glow w-[350px] h-[350px] sm:w-[550px] sm:h-[550px] bottom-12 -right-12 opacity-25" style={{ animationDelay: '-5s' }} />
+
+        <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
+          
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16 md:mb-24">
+            <motion.div 
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.4 }}
+              transition={{ duration: 1.5, ease: easePremium }}
+              className="space-y-4 md:space-y-6"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-8 h-[1px] bg-luxury-gold/50" />
+                <span className="text-editorial-caption text-luxury-gold block">The Curriculum</span>
+              </div>
+              <h2 className="font-serif text-[clamp(2.5rem,6vw,5rem)] text-luxury-white font-light leading-[1.05] tracking-tight">
+                Artistic <span className="italic text-luxury-muted">Disciplines</span>
+              </h2>
+            </motion.div>
+            <motion.a 
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: false, amount: 0.8 }}
+              transition={{ duration: 1.5, delay: 0.2, ease: easePremium }}
+              href="#footer" 
+              className="link-editorial text-[10px] md:text-xs uppercase tracking-[0.2em] pb-1 self-start md:self-auto"
+            >
+              View Full Schedule
+            </motion.a>
+          </div>
+
+          {/* Category Filter Tabs */}
+          <div className="flex justify-center mb-12 md:mb-16">
+            <div className="inline-flex flex-wrap md:flex-nowrap justify-center gap-1.5 p-1 rounded-full bg-luxury-charcoal/90 border border-luxury-border/60 backdrop-blur-md relative">
+              {categories.map((cat) => {
+                const isActive = activeCategory === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setActiveCategory(cat.id)}
+                    className={`relative px-4 py-2 md:px-6 md:py-2.5 text-[9px] md:text-xs tracking-wider uppercase rounded-full font-sans transition-colors duration-300 z-10 ${
+                      isActive ? 'text-luxury-black font-semibold' : 'text-luxury-muted hover:text-luxury-white'
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.span
+                        layoutId="activeCategoryIndicator"
+                        className="absolute inset-0 bg-luxury-gold rounded-full z-[-1]"
+                        transition={{ type: 'spring', stiffness: 220, damping: 26 }}
+                      />
+                    )}
+                    {cat.label}
+                  </button>
                 );
               })}
-
-              {/* Stacked Deck Help Prompt */}
-              <div className="absolute bottom-[35px] md:bottom-[0px] left-1 flex items-center space-x-2 text-[9px] uppercase font-bold tracking-widest text-studio-gold select-none animate-pulse font-sans">
-                <span>💡 Tap the cards to swap them!</span>
-              </div>
             </div>
+          </div>
 
-            {/* Right Column: Copywriting */}
-            <div className="space-y-10">
-              <div className="space-y-4">
-                <span className="text-[9px] uppercase tracking-[0.3em] text-studio-gold/80 font-sans font-semibold">
-                  Our Identity
-                </span>
-                <h2 className="font-serif text-3xl md:text-5xl font-normal leading-tight text-studio-charcoal">
-                  Where Passion, Form, &{' '}
-                  <span className="italic font-light text-studio-charcoal/70">Soul Collide</span>
-                </h2>
+          {/* Cinematic Showcase */}
+          <CinematicShowcase 
+            styles={filteredStyles} 
+            onSelectStyle={(s) => setSelectedStyle(s)} 
+          />
+
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          §4  TESTIMONIALS
+      ════════════════════════════════════════ */}
+      <section id="reviews" className="py-24 md:py-48 bg-luxury-black overflow-hidden border-y border-luxury-border/30 relative">
+        {/* Ambient Glowing Sphere */}
+        <div className="glow-ambient animate-float-glow w-[350px] h-[350px] sm:w-[500px] sm:h-[500px] top-[20%] left-1/2 -translate-x-1/2 opacity-[0.25]" style={{ animationDelay: '-12s' }} />
+        
+        <div className="max-w-5xl mx-auto px-6 md:px-12 text-center relative z-10">
+          
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.5 }}
+            transition={{ duration: 1.5, ease: easePremium }}
+            className="flex flex-col items-center justify-center gap-4 mb-12 md:mb-20"
+          >
+            <div className="flex items-center justify-center gap-4 mb-4">
+              <div className="w-12 h-[1px] bg-luxury-gold/30" />
+              <span className="text-editorial-caption text-luxury-gold block">Student Voices</span>
+              <div className="w-12 h-[1px] bg-luxury-gold/30" />
+            </div>
+            
+            <div className="bg-luxury-charcoal/40 border border-luxury-border/30 backdrop-blur-sm p-6 md:p-8 flex flex-col md:flex-row items-center justify-center gap-6 md:gap-10 rounded-lg max-w-3xl mx-auto w-full">
+              <div className="text-left space-y-1">
+                <h3 className="font-serif text-xl md:text-2xl text-luxury-white">Electrobattles Dance & Fitness Studio</h3>
+                <p className="font-sans text-xs md:text-sm text-luxury-muted">CBSC Rd, Jubilee Nagar, Veli, Kochi, Kerala 682002, India</p>
               </div>
-
-              <p className="text-studio-charcoal/60 leading-[1.9] font-light font-sans text-sm max-w-md">
-                Electrobattles is a beacon of artistic excellence. We believe dance is more than physical steps — it is an intricate dialogue between the soul and space. Our curriculum merges technical precision with creative liberation, preparing students for both professional stages and personal growth.
-              </p>
-
-              {/* Stats — horizontal pill rows */}
-              <div className="space-y-4 pt-2">
-                {[
-                  { value: '98%', label: 'Student Satisfaction' },
-                  { value: '500+', label: 'Students Trained' },
-                ].map(({ value, label }) => (
-                  <div key={label} className="flex items-center gap-5">
-                    <span className="font-serif text-2xl font-normal text-studio-charcoal w-16 shrink-0">{value}</span>
-                    <div className="flex-1 h-px bg-studio-charcoal/10" />
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-studio-charcoal/45 font-sans font-semibold">{label}</span>
+              <div className="hidden md:block w-[1px] h-12 bg-luxury-border/40" />
+              <div className="flex items-center gap-4">
+                <div className="flex flex-col items-center">
+                  <span className="font-serif text-4xl text-[#F5E6C4] leading-none mb-1">4.9</span>
+                  <div className="flex gap-0.5 text-luxury-gold">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-3.5 h-3.5 fill-current" />
+                    ))}
                   </div>
-                ))}
-              </div>
-
-              <div className="pt-2">
-                <a
-                  href="#classes"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    document.getElementById('classes')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                  className="group flex items-center gap-4"
-                >
-                  <span className="w-6 h-[1px] bg-studio-charcoal/40 group-hover:w-10 transition-all duration-700" />
-                  <span className="font-sans text-[10px] uppercase tracking-[0.25em] text-studio-charcoal/60 group-hover:text-studio-charcoal transition-colors duration-500 font-semibold">
-                    Discover Our Legacy
-                  </span>
-                  <ArrowRight className="w-3.5 h-3.5 text-studio-charcoal/30 group-hover:text-studio-charcoal group-hover:translate-x-1 transition-all duration-500" />
-                </a>
+                </div>
+                <div className="text-left">
+                  <span className="block font-sans text-xs uppercase tracking-widest text-luxury-white">33 Reviews</span>
+                  <span className="block font-sans text-[10px] text-luxury-muted mt-0.5">Google Rating</span>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <div className="classic-divider" />
-
-      {/* 3. Why Choose Us Section */}
-      <section className="py-24 md:py-32 relative bg-studio-dark/50">
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
+          </motion.div>
           
-          <div className="text-center max-w-2xl mx-auto mb-20 space-y-4">
-            <span className="text-xs uppercase tracking-widest text-studio-gold font-semibold font-serif italic">
-              Unrivaled Standards
-            </span>
-            <h2 className="font-serif text-3xl md:text-5xl font-normal text-studio-charcoal">
-              Why Elite Dancers Choose <span className="text-gold-gradient italic">Electrobattles</span>
-            </h2>
-            <p className="text-studio-charcoal/60 font-light font-sans text-sm">
-              We provide an unparalleled artistic ecosystem that refines your raw talent into stunning visual expertise.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <GlassCard hoverGlow="gold" delay={0.1}>
-              <Award className="w-10 h-10 text-studio-gold mb-6" />
-              <h3 className="font-serif text-lg font-bold mb-3 text-studio-charcoal">Elite Performers</h3>
-              <p className="text-studio-charcoal/70 text-sm font-sans font-light leading-relaxed">
-                Learn under acclaimed principal soloists, industry pioneers, and international choreographers.
-              </p>
-            </GlassCard>
-
-            <GlassCard hoverGlow="gold" delay={0.2}>
-              <Flame className="w-10 h-10 text-studio-gold mb-6" />
-              <h3 className="font-serif text-lg font-bold mb-3 text-studio-charcoal">Premium Floor Plans</h3>
-              <p className="text-studio-charcoal/70 text-sm font-sans font-light leading-relaxed">
-                Practice safely on orthopedic floating floors, professional acoustic design, and premium floor mirrors.
-              </p>
-            </GlassCard>
-
-            <GlassCard hoverGlow="gold" delay={0.3}>
-              <Globe className="w-10 h-10 text-studio-gold mb-6" />
-              <h3 className="font-serif text-lg font-bold mb-3 text-studio-charcoal">Global Stage</h3>
-              <p className="text-studio-charcoal/70 text-sm font-sans font-light leading-relaxed">
-                Showcase your artistry in biannual theater recitals, international showcases, and industry festivals.
-              </p>
-            </GlassCard>
-
-            <GlassCard hoverGlow="gold" delay={0.4}>
-              <Compass className="w-10 h-10 text-studio-gold mb-6" />
-              <h3 className="font-serif text-lg font-bold mb-3 text-studio-charcoal">Custom Growth Paths</h3>
-              <p className="text-studio-charcoal/70 text-sm font-sans font-light leading-relaxed">
-                Bespoke career planning, video reviews, and customized mentorship programs matching your personal goals.
-              </p>
-            </GlassCard>
-          </div>
-        </div>
-      </section>
-
-      <div className="classic-divider" />
-
-      {/* 4. Dance Styles Offered Section */}
-      <section id="classes" className="py-24 md:py-32 relative">
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
-          
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-            <div className="space-y-4">
-              <span className="text-xs uppercase tracking-widest text-studio-gold font-semibold font-serif italic">
-                Artistic Disciplines
-              </span>
-              <h2 className="font-serif text-3xl md:text-5xl font-normal text-studio-charcoal">
-                Dance Styles <span className="text-gold-gradient italic">We Perfect</span>
-              </h2>
-            </div>
-            <a
-              href="#contact"
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="inline-flex items-center space-x-2 bg-gradient-to-r from-[#DFC98A] to-[#C9A84C] border border-studio-gold/60 rounded-full px-6 py-2.5 text-xs text-[#2C1F0E] uppercase font-bold tracking-widest hover:from-[#C9A84C] hover:to-[#9A7A2E] hover:text-white transition-apple shadow-sm font-sans"
-            >
-              <span>Inquire Today</span>
-              <ArrowRight className="w-4 h-4" />
-            </a>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-            {featuredStyles.map((style, idx) => (
+          <div className="relative min-h-[450px] sm:min-h-[350px] md:min-h-[300px] flex flex-col justify-center">
+            <AnimatePresence mode="wait">
               <motion.div
-                key={style.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                className="group relative rounded-2xl overflow-hidden border border-[#A08246]/15 bg-white shadow-md h-[200px] md:h-[400px]"
+                key={review}
+                initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, y: -20, filter: 'blur(8px)' }}
+                transition={{ duration: 1.2, ease: easePremium }}
+                className="absolute inset-0 flex flex-col items-center justify-center w-full px-2 md:px-4"
               >
-                {/* Background image */}
-                <div className="absolute inset-0 bg-cover bg-center transition-transform duration-750 group-hover:scale-[1.05]" style={{ backgroundImage: `url(${style.image})` }} />
-                
-                {/* Gradient overlay — deep for text readability */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent z-10 transition-colors duration-500" />
-
-                {/* Content */}
-                <div className="absolute inset-x-0 bottom-0 p-3 md:p-6 z-20 flex flex-col justify-end h-full">
-                  {style.level && (
-                    <span className="text-[10px] text-studio-gold font-semibold uppercase tracking-widest mb-1.5 font-sans">
-                      {style.level}
-                    </span>
-                  )}
-                  <h3 className="font-serif text-base md:text-lg font-semibold text-white mb-2 tracking-wide group-hover:text-studio-gold transition-colors duration-300">
-                    {style.title}
-                  </h3>
-                  <p className="text-white/65 text-xs font-sans font-light leading-relaxed opacity-0 max-h-0 group-hover:opacity-100 group-hover:max-h-24 transition-all duration-500 overflow-hidden mt-1">
-                    {style.desc}
-                  </p>
-                  
-                  <a 
-                    href="#contact" 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-                    }}
-                    className="mt-2 md:mt-4 flex items-center space-x-1.5 text-xs text-studio-gold font-semibold uppercase tracking-wider group-hover:translate-x-1.5 transition-transform duration-300 font-sans"
-                  >
-                    <span>Inquire About Style</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </a>
+                <span className="font-serif text-[6rem] md:text-[8rem] text-luxury-gold/20 absolute -top-12 md:-top-24 select-none leading-none h-20 md:h-24 overflow-hidden">
+                  &ldquo;
+                </span>
+                <p className="font-serif italic text-lg sm:text-xl md:text-3xl lg:text-4xl text-[#F5E6C4] font-light leading-[1.7] md:leading-[1.6] mb-10 md:mb-16 line-clamp-6 md:line-clamp-4 relative z-10 px-4 md:px-0 drop-shadow-sm">
+                  {googleReviews[review].text}
+                </p>
+                <div className="relative z-10">
+                  <h4 className="font-sans text-[10px] md:text-xs uppercase tracking-[0.2em] text-luxury-gold mb-2">{googleReviews[review].name}</h4>
+                  <span className="text-editorial-caption text-luxury-muted tracking-[0.2em]">{googleReviews[review].date}</span>
                 </div>
               </motion.div>
-            ))}
+            </AnimatePresence>
           </div>
+
+          <motion.div 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: false, amount: 0.8 }}
+            transition={{ duration: 1.5, delay: 0.2, ease: easePremium }}
+            className="flex justify-center items-center gap-6 md:gap-12 mt-10 sm:mt-16 md:mt-24"
+          >
+            <button 
+              onClick={() => setReview(p => (p - 1 + googleReviews.length) % googleReviews.length)}
+              className="text-luxury-muted hover:text-luxury-gold transition-colors duration-500 p-2 group"
+            >
+              <ChevronLeft className="w-5 h-5 md:w-8 md:h-8 stroke-[1] group-hover:-translate-x-1 transition-transform duration-500 ease-[0.16,1,0.3,1]" />
+            </button>
+            <div className="flex gap-2 md:gap-3">
+              {googleReviews.map((_, i) => (
+                <div 
+                  key={i} 
+                  className={`h-[1.5px] transition-all duration-1000 ease-[0.16,1,0.3,1] ${i === review ? 'w-8 md:w-12 bg-luxury-gold' : 'w-2 md:w-3 bg-luxury-border'}`}
+                />
+              ))}
+            </div>
+            <button 
+              onClick={() => setReview(p => (p + 1) % googleReviews.length)}
+              className="text-luxury-muted hover:text-luxury-gold transition-colors duration-500 p-2 group"
+            >
+              <ChevronRight className="w-5 h-5 md:w-8 md:h-8 stroke-[1] group-hover:translate-x-1 transition-transform duration-500 ease-[0.16,1,0.3,1]" />
+            </button>
+          </motion.div>
+
         </div>
       </section>
 
-      <div className="classic-divider" />
+      {/* ════════════════════════════════════════
+          §5  CTA
+      ════════════════════════════════════════ */}
+      <section className="py-24 md:py-56 bg-luxury-black relative overflow-hidden flex items-center justify-center text-center">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-luxury-orange/5 via-luxury-black to-luxury-black pointer-events-none" />
+        
+        {/* Ambient Glowing Sphere */}
+        <div className="glow-ambient animate-float-glow w-[350px] h-[350px] sm:w-[600px] sm:h-[600px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-35" style={{ animationDelay: '-8s' }} />
+        
+        <div className="relative z-10 max-w-4xl mx-auto px-6">
+          <motion.h2 
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.5 }}
+            transition={{ duration: 1.5, ease: easePremium }}
+            className="font-serif text-[clamp(2.8rem,8vw,6rem)] text-luxury-white font-light leading-[1.05] mb-10 md:mb-16 tracking-tight"
+          >
+            Awaken your <br/>
+            <span className="italic text-luxury-muted">artistic potential</span>
+          </motion.h2>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.8 }}
+            transition={{ duration: 1.5, delay: 0.2, ease: easePremium }}
+          >
+            <MagneticBtn href="#footer">
+              Begin Your Journey
+            </MagneticBtn>
+          </motion.div>
+        </div>
+      </section>
 
-      {/* 5. Google Reviews Section */}
-      <section id="reviews" className="py-24 md:py-32 relative bg-studio-dark/50">
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
-          
-          <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
-            <span className="text-xs uppercase tracking-widest text-studio-gold font-semibold flex items-center justify-center gap-2 font-serif italic">
-              <Sparkles className="w-3.5 h-3.5 text-studio-gold" />
-              Community Reviews
-            </span>
-            <h2 className="font-serif text-3xl md:text-5xl font-normal text-studio-charcoal">
-              What Our <span className="text-gold-gradient italic">Students Have to Say</span>
-            </h2>
-            <div className="flex items-center justify-center gap-3 pt-2 font-sans">
-              <span className="text-xl font-bold text-studio-charcoal">4.9</span>
-              <div className="flex items-center text-studio-gold">
-                <Star className="w-4 h-4 fill-current" />
-                <Star className="w-4 h-4 fill-current" />
-                <Star className="w-4 h-4 fill-current" />
-                <Star className="w-4 h-4 fill-current" />
-                <Star className="w-4 h-4 fill-current" />
-              </div>
-              <span className="text-studio-charcoal/60 text-sm font-light">74 Reviews</span>
-            </div>
-          </div>
+      {/* Detailed Apple-style Sliding Drawer */}
+      <AnimatePresence>
+        {selectedStyle && (
+          <>
+            {/* Backdrop underlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.6 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+              onClick={() => setSelectedStyle(null)}
+              className="fixed inset-0 bg-black z-50 backdrop-blur-sm"
+            />
 
-          {/* Testimonial Slider Container */}
-          <div className="relative max-w-3xl mx-auto px-4 md:px-12">
-            {/* Carousel Card */}
-            <div className="min-h-[380px] md:min-h-[320px] flex flex-col justify-between glassmorphism border border-[#A08246]/15 rounded-3xl p-5 md:p-12 bg-white shadow-md relative overflow-hidden">
-              {/* Google G Logo Background Decoration */}
-              <div className="absolute top-6 right-6">
-                <svg className="w-8 h-8 opacity-10 text-studio-charcoal fill-current" viewBox="0 0 24 24">
-                  <path d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114-3.41 0-6.19-2.78-6.19-6.19s2.78-6.19 6.19-6.19c1.602 0 3.013.616 4.09 1.616l3.078-3.078C19.345 2.19 16.035 1 12.24 1 6.033 1 12.24s5.033 11.24 11.24 11.24c5.84 0 10.843-4.178 10.843-11.24 0-.67-.06-1.32-.178-1.955H12.24z" />
-                </svg>
-              </div>
+            {/* Sliding Glass Drawer Panel */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 220 }}
+              className="fixed right-0 top-0 bottom-0 w-full max-w-lg md:max-w-xl bg-luxury-charcoal/98 backdrop-blur-2xl border-l border-luxury-border/80 shadow-[0_0_50px_rgba(0,0,0,0.9)] z-50 overflow-y-auto flex flex-col"
+            >
+              {/* Header Visual Cover (100% Image-Free, Premium Typographic) */}
+              <div className="relative w-full h-[200px] md:h-[220px] bg-gradient-to-br from-luxury-charcoal to-luxury-black border-b border-luxury-border/40 overflow-hidden flex-shrink-0 flex items-end p-8 md:p-10">
+                {/* Decorative Soft Golden Ambient Wash */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] h-[250px] bg-luxury-gold/5 rounded-full blur-[80px] pointer-events-none" />
+                
+                {/* Decorative Wide Monospace Label */}
+                <div className="absolute right-8 top-8 font-mono text-[9px] tracking-mega text-luxury-gold/20 select-none pointer-events-none">
+                  EB // CURRICULUM.SPEC
+                </div>
 
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeReviewIndex}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                  className="flex flex-col justify-between h-full"
+                {/* Close Button */}
+                <button
+                  onClick={() => setSelectedStyle(null)}
+                  className="absolute top-6 right-6 p-2.5 rounded-none bg-black/60 border border-luxury-border hover:border-luxury-gold/40 text-luxury-muted hover:text-luxury-white transition-all duration-300 backdrop-blur-md group"
                 >
-                  <div className="text-center">
-                    {/* Stars */}
-                    <div className="flex items-center text-studio-gold mb-6 justify-center">
-                      {[...Array(googleReviews[activeReviewIndex].rating)].map((_, i) => (
-                        <Star key={i} className="w-4.5 h-4.5 fill-current" />
-                      ))}
-                    </div>
+                  <X className="w-4 h-4 stroke-[1.5] group-hover:scale-110 group-hover:rotate-90 transition-transform duration-500 ease-out" />
+                </button>
 
-                    {/* Review Text */}
-                    <p className="text-studio-charcoal/80 font-serif italic font-light text-sm md:text-base leading-relaxed whitespace-pre-line max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
-                      "{googleReviews[activeReviewIndex].text}"
-                    </p>
+                <div className="space-y-2 relative z-10 w-full">
+                  <span className="text-[8px] uppercase tracking-mega text-luxury-gold">{selectedStyle.category === 'performance' ? 'Elite Performance' : selectedStyle.category === 'grooves' ? 'Grooves & Street' : selectedStyle.category === 'youth' ? 'Youth & Kids' : 'Fitness & Foundations'}</span>
+                  <h2 className="font-serif text-3.5xl md:text-5xl text-luxury-white tracking-tight leading-none italic">{selectedStyle.title}</h2>
+                </div>
+              </div>
+
+              {/* Content Details */}
+              <div className="p-8 md:p-10 flex-grow space-y-8">
+                <div className="space-y-4">
+                  {/* Level spec tag */}
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 border border-luxury-gold/20 bg-luxury-gold/5 backdrop-blur-sm rounded-none w-fit">
+                    <span className="w-1.5 h-1.5 rounded-full bg-luxury-gold animate-pulse-glow" />
+                    <span className="text-[8px] md:text-[9px] uppercase tracking-mega text-luxury-gold font-medium">{selectedStyle.level}</span>
                   </div>
+                  <p className="font-sans font-light text-luxury-muted text-sm md:text-base leading-relaxed pt-2">
+                    {selectedStyle.desc}
+                  </p>
+                </div>
 
-                  {/* Reviewer Details */}
-                  <div className="mt-8 pt-6 border-t border-[#A08246]/10 flex items-center justify-between">
-                    <div className="text-left font-serif">
-                      <h4 className="text-studio-gold text-sm font-semibold tracking-wider italic">
-                        {googleReviews[activeReviewIndex].name}
-                      </h4>
-                      <p className="text-studio-charcoal/50 text-[10px] uppercase tracking-widest font-sans mt-0.5">
-                        Google Review
-                      </p>
+                <div className="h-[0.5px] bg-luxury-border/40 w-full" />
+
+                {/* Info blocks: Time & Mentor */}
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-luxury-muted">
+                      <Clock className="w-4 h-4 stroke-[1.5]" />
+                      <span className="font-sans text-[10px] md:text-xs uppercase tracking-widest">Schedule</span>
                     </div>
-                    {/* Page counter */}
-                    <span className="text-[10px] text-studio-charcoal/50 font-mono">
-                      {activeReviewIndex + 1} / {googleReviews.length}
-                    </span>
+                    <p className="font-sans font-medium text-luxury-white text-xs md:text-sm">{selectedStyle.schedule}</p>
                   </div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-luxury-muted">
+                      <User className="w-4 h-4 stroke-[1.5]" />
+                      <span className="font-sans text-[10px] md:text-xs uppercase tracking-widest">Lead Mentor</span>
+                    </div>
+                    <p className="font-sans font-medium text-luxury-white text-xs md:text-sm">{selectedStyle.mentor}</p>
+                  </div>
+                </div>
 
-            {/* Navigation Arrows */}
-            <button
-              onClick={handleReviewPrev}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 md:-translate-x-6 lg:-translate-x-12 w-11 h-11 rounded-full bg-white border border-[#A08246]/15 flex items-center justify-center text-studio-charcoal hover:border-studio-gold hover:text-studio-gold transition-apple z-20 shadow-sm"
-              aria-label="Previous review"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={handleReviewNext}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 md:translate-x-6 lg:translate-x-12 w-11 h-11 rounded-full bg-white border border-[#A08246]/15 flex items-center justify-center text-studio-charcoal hover:border-studio-gold hover:text-studio-gold transition-apple z-20 shadow-sm"
-              aria-label="Next review"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
+                <div className="h-[0.5px] bg-luxury-border/40 w-full" />
 
-          {/* Indicator Dots */}
-          <div className="flex justify-center space-x-2 mt-8">
-            {googleReviews.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setActiveReviewIndex(idx)}
-                className={`w-2 h-2 rounded-full transition-apple ${
-                  idx === activeReviewIndex ? 'bg-studio-gold w-5' : 'bg-studio-charcoal/20 hover:bg-studio-charcoal/40'
-                }`}
-                aria-label={`Go to review ${idx + 1}`}
-              />
-            ))}
-          </div>
+                {/* Highlights */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-luxury-muted">
+                    <Award className="w-4 h-4 stroke-[1.5]" />
+                    <span className="font-sans text-[10px] md:text-xs uppercase tracking-widest">Training Highlights</span>
+                  </div>
+                  <ul className="space-y-3.5 pl-1">
+                    {selectedStyle.highlights.map((h, idx) => (
+                      <li key={idx} className="flex items-start gap-3.5 text-xs md:text-sm text-luxury-white/90">
+                        <span className="mt-1.5 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-luxury-gold" />
+                        <span className="font-sans font-light leading-relaxed">{h}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
 
-          <div className="text-center mt-14">
-            <a
-              href="https://www.google.com/maps/search/?api=1&query=Electrobattles+Dance+%26+Fitness+Studio+Kochi"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center space-x-2 bg-[#F5ECD7] border border-[#A08246]/20 rounded-full px-8 py-3.5 text-xs text-studio-charcoal uppercase font-bold tracking-widest hover:border-studio-gold hover:text-studio-gold hover:bg-studio-gold/5 transition-apple shadow-sm font-sans"
-            >
-              <span>See All Google Reviews</span>
-              <ArrowRight className="w-4 h-4" />
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <div className="classic-divider" />
-
-      {/* 6. Call To Action Section */}
-      <section className="relative py-20 md:py-40 flex items-center justify-center overflow-hidden">
-        {/* Deep dark background */}
-        <div className="absolute inset-0 bg-studio-charcoal z-0" />
-        {/* Subtle gold radial glow */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(160,130,70,0.12)_0%,_transparent_70%)] z-0" />
-        {/* Fine grain texture overlay */}
-        <div className="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22/%3E%3C/svg%3E')] z-0" />
-
-        <div className="relative max-w-3xl mx-auto px-6 text-center z-10">
-          {/* Gold divider line */}
-          <div className="flex items-center justify-center gap-4 mb-12">
-            <div className="h-px w-12 bg-studio-gold/40" />
-            <span className="font-sans text-[9px] uppercase tracking-[0.35em] text-studio-gold/60 font-semibold">Join Us</span>
-            <div className="h-px w-12 bg-studio-gold/40" />
-          </div>
-
-          <h2 className="font-serif text-3xl md:text-5xl lg:text-6xl font-normal tracking-tight leading-[1.1] text-[#F5ECD7] mb-6">
-            Ready to awaken<br />
-            <span className="italic font-light text-[#F5ECD7]/70">your artistic potential?</span>
-          </h2>
-
-          <p className="font-sans font-light text-sm text-[#F5ECD7]/45 max-w-sm mx-auto leading-[2] tracking-[0.02em] mb-14">
-            Join a legacy of extraordinary dancers. Your journey to mastery begins with a single step.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <a
-              href="#footer"
-              className="group relative overflow-hidden px-12 py-4 border border-[#F5ECD7]/20 text-[#F5ECD7] text-[10px] tracking-[0.3em] uppercase font-sans font-semibold hover:border-studio-gold/60 transition-all duration-700"
-            >
-              <div className="absolute inset-0 bg-studio-gold/0 group-hover:bg-studio-gold/8 transition-colors duration-700" />
-              <span className="relative flex items-center gap-3">
-                Enroll Now
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1.5 transition-transform duration-500" />
-              </span>
-            </a>
-            <a
-              href="#about"
-              className="text-[#F5ECD7]/35 text-[10px] tracking-[0.3em] uppercase font-sans font-semibold hover:text-[#F5ECD7]/70 transition-colors duration-500"
-            >
-              Learn More
-            </a>
-          </div>
-        </div>
-      </section>
+              {/* Action Footer */}
+              <div className="p-8 border-t border-luxury-border/50 bg-black/40 flex items-center justify-between gap-4">
+                <div className="hidden sm:block">
+                  <span className="block text-[8px] text-luxury-muted uppercase tracking-wider mb-1">Have questions?</span>
+                  <a href="mailto:electrobattles@gmail.com" className="text-xs text-luxury-gold hover:text-white transition-colors">electrobattles@gmail.com</a>
+                </div>
+                <a
+                  href="#footer"
+                  onClick={() => setSelectedStyle(null)}
+                  className="btn-luxury w-full sm:w-auto text-center justify-center inline-flex items-center"
+                >
+                  Inquire Class
+                </a>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
     </div>
   );

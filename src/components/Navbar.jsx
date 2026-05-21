@@ -1,123 +1,120 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, Sparkles } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const navLinks = [
-  { id: 'top', label: 'Home' },
-  { id: 'about', label: 'About' },
-  { id: 'classes', label: 'Classes' },
-  { id: 'reviews', label: 'Reviews' },
-  { id: 'footer', label: 'Contact' },
+const links = [
+  { id: 'top',     label: 'Home' },
+  { id: 'about',   label: 'Philosophy' },
+  { id: 'classes', label: 'Disciplines' },
+  { id: 'reviews', label: 'Testimonials' },
+  { id: 'footer',  label: 'Contact' },
 ];
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [open,      setOpen]      = useState(false);
+  const [scrolled,  setScrolled]  = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 20) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const fn = () => setScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', fn);
+    return () => window.removeEventListener('scroll', fn);
   }, []);
 
-  const toggleMenu = () => setIsOpen(!isOpen);
-  const closeMenu = () => setIsOpen(false);
-
-  const handleNavClick = (id, e) => {
-    e.preventDefault();
-    closeMenu();
-    if (id === 'top') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+  useEffect(() => {
+    // When mobile menu is open, prevent background scrolling
+    if (open) {
+      document.body.style.overflow = 'hidden';
     } else {
-      const element = document.getElementById(id);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
+      document.body.style.overflow = '';
     }
-  };
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [open]);
 
   return (
     <>
-      <motion.nav
+      <motion.header
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="relative w-full z-40 transition-all duration-500 ease-[0.16,1,0.3,1] bg-[#E8D9B8] py-3 shadow-sm"
+        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 bg-luxury-black/85 backdrop-blur-md border-b ${
+          scrolled ? 'border-luxury-border shadow-sm' : 'border-transparent'
+        }`}
       >
-        <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
-          {/* Logo */}
-          <a href="#" onClick={(e) => handleNavClick('top', e)} className="flex items-center group -ml-1 sm:ml-0">
-            <img 
-              src="/logo-bird.png" 
-              alt="Electrobattles Logo" 
-              className="h-10 sm:h-12 w-auto transition-transform duration-300 group-hover:scale-105"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-                document.getElementById('fallback-logo-text').style.display = 'block';
-              }}
-            />
-            <span id="fallback-logo-text" className="font-serif italic text-xl sm:text-2xl font-bold tracking-wider text-studio-charcoal hidden">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 h-14 md:h-16 flex items-center justify-between">
+          {/* Logo - Minimalist Typographic */}
+          <a href="#" onClick={(e) => nav('top', e)} className="flex items-center group">
+            <span className="font-serif text-lg md:text-xl tracking-widest text-luxury-white uppercase font-light group-hover:text-luxury-gold transition-colors duration-500">
               Electrobattles
             </span>
           </a>
-
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-8">
-            <ul className="flex items-center space-x-8 font-serif text-xs tracking-widest uppercase">
-              {navLinks.map((link) => (
-                <li key={link.id} className="relative group">
+ 
+          {/* Desktop Nav */}
+          <nav className="hidden lg:flex items-center gap-12">
+            <ul className="flex items-center gap-10">
+              {links.map((l) => (
+                <li key={l.id}>
                   <a
-                    href={`#${link.id}`}
-                    onClick={(e) => handleNavClick(link.id, e)}
-                    className="transition-colors duration-500 ease-[0.16,1,0.3,1] py-1.5 text-studio-charcoal/70 hover:text-studio-gold hover:font-bold"
+                    href={`#${l.id}`}
+                    onClick={(e) => nav(l.id, e)}
+                    className="text-editorial-caption link-editorial"
                   >
-                    {link.label}
+                    {l.label}
                   </a>
                 </li>
               ))}
             </ul>
-          </div>
-
-          {/* Mobile Menu Button */}
+          </nav>
+ 
+          {/* Mobile toggle */}
           <button
-            onClick={toggleMenu}
-            className="lg:hidden text-studio-charcoal hover:text-studio-gold transition-colors p-1"
-            aria-label="Toggle menu"
+            onClick={() => setOpen(!open)}
+            className="lg:hidden text-luxury-white hover:text-luxury-gold transition-colors duration-500"
+            aria-label="Menu"
           >
-            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {open ? <X className="w-6 h-6 stroke-[1]" /> : <Menu className="w-6 h-6 stroke-[1]" />}
           </button>
         </div>
-      </motion.nav>
-
-      {/* Mobile Navigation Drawer */}
+      </motion.header>
+ 
+      {/* Mobile drawer */}
       <AnimatePresence>
-        {isOpen && (
+        {open && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-30 lg:hidden bg-[#F5ECD7]/80 backdrop-blur-lg flex flex-col justify-center items-center px-6 pt-24"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="fixed inset-0 z-40 lg:hidden flex flex-col justify-center items-center bg-luxury-black"
           >
-            <ul className="flex flex-col space-y-6 text-center font-serif text-base tracking-widest uppercase mb-8">
-              {navLinks.map((link) => (
-                <li key={link.id}>
+            <ul className="flex flex-col items-center gap-10 font-serif text-3xl font-light text-luxury-white">
+              {links.map((l, i) => (
+                <motion.li
+                  key={l.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                >
                   <a
-                    href={`#${link.id}`}
-                    onClick={(e) => handleNavClick(link.id, e)}
-                    className="block py-2 transition-colors duration-300 text-studio-charcoal hover:text-studio-gold"
+                    href={`#${l.id}`}
+                    onClick={(e) => nav(l.id, e)}
+                    className="hover:text-luxury-gold transition-colors duration-500 block"
                   >
-                    {link.label}
+                    {l.label}
                   </a>
-                </li>
+                </motion.li>
               ))}
             </ul>
+ 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6, duration: 1 }}
+              className="mt-16"
+            >
+
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
